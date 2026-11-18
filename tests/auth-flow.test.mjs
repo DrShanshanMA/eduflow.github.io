@@ -1,0 +1,6 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {callbackState,observeRecovery,authErrorMessage} from '../lib/auth-flow.mjs';
+test('existing recovery and invitation email links use their implicit flow and open password form',()=>{for(const type of ['recovery','invite']){const state=callbackState('https://example.edu/studio/#access_token=test&refresh_token=test&type='+type);assert.equal(state.flowType,'implicit');assert.equal(state.recovery,true)}});
+test('PKCE code callback retains PKCE and recovery event survives component mounting',()=>{const state=callbackState('https://example.edu/studio/?code=test');assert.equal(state.flowType,'pkce');let notify;observeRecovery({onAuthStateChange(fn){notify=fn}},state);notify('PASSWORD_RECOVERY');notify('INITIAL_SESSION');assert.equal(state.recovery,true);notify('SIGNED_OUT');assert.equal(state.recovery,false)});
+test('expired links and missing browser verifier produce actionable errors without leaking tokens',()=>{const state=callbackState('https://example.edu/studio/#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired');assert.match(state.error,/new password reset/);assert.match(authErrorMessage({message:'PKCE code verifier not found'}),/same browser/)});
