@@ -6,10 +6,10 @@ An independent version of CourseStudio. This source does not modify or synchroni
 
 1. Use the `DrShanshanMA/eduflow.github.io` repository for this source. Its normal project Pages address is `https://drshanshanma.github.io/eduflow.github.io/` (the repository name alone does not create an eduflow.github.io domain).
 2. In Supabase, apply `supabase/migrations/202611170001_workspace.sql`. It creates an isolated server-only workspace table; browsers have no table access.
-3. Set Edge Function secrets `COURSESTUDIO_OWNER_EMAIL` to the initial administrator's verified sign-in email and `COURSESTUDIO_ALLOWED_ORIGINS` to `https://drshanshanma.github.io`. Add additional origins separated by commas only when needed. Secrets belong in Supabase, never GitHub Pages.
+3. Configure the server-only `coursestudio_settings` row (id `team`, `owner_email`, and JSON `allowed_origins`), or set Edge Function secrets `COURSESTUDIO_OWNER_EMAIL` to the initial administrator's verified sign-in email and `COURSESTUDIO_ALLOWED_ORIGINS` to `https://drshanshanma.github.io`. Add additional origins separated by commas only when needed. Secrets belong in Supabase, never GitHub Pages.
 4. Deploy `supabase/functions/workflow` as `workflow` with gateway JWT verification disabled. The function verifies every bearer token directly with Supabase Auth before authorizing access. The platform supplies its server credentials.
 5. Enable email/password authentication and email confirmation in Supabase Auth. Set Site URL and allowed redirect URL to the full Pages address above. Configure production email delivery before inviting a team.
-6. Add GitHub repository Actions variables `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` from the project's public connection settings. Never put a secret/service-role key there.
+6. Public connection settings for the selected project are recorded in `lib/deployment-config.json` (publishable key only). To override them, add GitHub repository Actions variables `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` from the project's public connection settings. Never put a secret/service-role key there.
 7. In repository Settings → Pages, select GitHub Actions. Run the Publish CourseStudio workflow after the backend is configured.
 8. Create and confirm the owner account. Sign in once to initialize the new workspace, then add team members by their verified sign-in emails. Team members create their own accounts; authentication registration alone does not grant project access.
 

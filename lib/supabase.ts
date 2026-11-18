@@ -1,6 +1,7 @@
 import {createClient} from '@supabase/supabase-js';
+import deployment from './deployment-config.json';
 import {publicConfig} from './public-config.mjs';
-export const connection=publicConfig(import.meta.env.VITE_SUPABASE_URL,import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY);
+export const connection=publicConfig(import.meta.env.VITE_SUPABASE_URL||deployment.url,import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY||deployment.key);
 export const supabase=connection.ok?createClient(connection.url!,connection.key!,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,flowType:'pkce'}}):null;
 export function appRedirectUrl(){
  const configured=import.meta.env.VITE_AUTH_REDIRECT_URL;
