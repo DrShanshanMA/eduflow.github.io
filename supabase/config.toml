@@ -1,0 +1,6 @@
+project_id = "coursestudio"
+
+[functions.workflow]
+# The handler verifies every bearer token with Supabase Auth getUser().
+# Legacy gateway checks do not support all modern publishable-key flows.
+verify_jwt = false
