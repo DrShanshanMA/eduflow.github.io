@@ -22,6 +22,7 @@ export function tasks(organizer=''){return labels.flatMap((a,stage)=>a.map((titl
 export function initial(email){return {owner:email,accessVersion:1,members:[{email,name:email.split('@')[0],role:'staff',admin:true}],groups:[{id:'main-group',name:'Main group',members:[{email,role:'manager'}]}],courses:[],projects:[],notifications:[],history:[]};}
 export function normalize(s){
  s.courses??=[];s.workflowTemplates??=[];
+ for(const template of s.workflowTemplates)template.name??=(categories.find(c=>c.id===template.category)?.name||'Category')+' workflow';
  for(const p of s.projects){
   p.category??='digital-twin';
   if(!p.courseId){if(!s.courses.some(c=>c.id==='unassigned-course'))s.courses.push({id:'unassigned-course',name:'Unassigned course'});p.courseId='unassigned-course';}
@@ -109,10 +110,14 @@ export function mutate(s,actor,a){
  if(a.type==='workflowTemplate'){
   if(!groupOf(s,a.group)||!managesGroup(s,actor,a.group))throw Error('Group manager access required to save category workflows.');
   if(!categories.some(c=>c.id===a.category))throw Error('Select a project category.');
-  const steps=validateSteps(a.steps,a.category);const existing=s.workflowTemplates.find(t=>t.groupId===a.group&&t.category===a.category);
-  const values={steps,updatedBy:actor,updatedAt:new Date().toISOString()};
+  const existing=a.templateId?s.workflowTemplates.find(t=>t.id===a.templateId&&t.groupId===a.group&&t.category===a.category):a.name===undefined?s.workflowTemplates.find(t=>t.groupId===a.group&&t.category===a.category):null;
+  if(a.templateId&&!existing)throw Error('Workflow template not found or access denied.');
+  const name=String(a.name??existing?.name??(categories.find(c=>c.id===a.category).name+' workflow')).trim();
+  if(!name||name.length>120)throw Error('Enter a template name of 1–120 characters.');
+  if(s.workflowTemplates.some(t=>t.groupId===a.group&&t.category===a.category&&t.id!==existing?.id&&t.name.toLowerCase()===name.toLowerCase()))throw Error('A template with this name already exists in this category.');
+  const steps=validateSteps(a.steps,a.category),values={name,steps,updatedBy:actor,updatedAt:new Date().toISOString()};
   if(existing)Object.assign(existing,values);else s.workflowTemplates.push({id:id(),groupId:a.group,category:a.category,...values});
-  log('Saved category workflow: '+categories.find(c=>c.id===a.category).name,undefined,a.group);return s;
+  log('Saved workflow template: '+name,undefined,a.group);return s;
  }
  if(a.type==='create'){
 
@@ -122,8 +127,9 @@ export function mutate(s,actor,a){
   const group=a.group||s.courses.find(c=>c.id===a.course)?.groupId||s.groups.find(g=>canCreateInGroup(s,actor,g.id))?.id;requireCreate(group);
   let organizer=a.organizer||actor;requireGroupPerson(group,organizer);
   let p={id:id(),title:String(a.title).trim(),category,groupId:group,members:[...new Set([actor,organizer])].filter(e=>inGroup(s,e,group)),courseId:courseFor(a.course,a.newCourse,group),organizer,stage:0,cycle:1,tasks:category==='digital-twin'?tasks(organizer):[],issues:[],archives:[],created:new Date().toISOString()};
-  const template=a.useTemplate!==false&&s.workflowTemplates.find(t=>t.groupId===group&&t.category===category);
-  if(template){p.workflow=structuredClone(template.steps);p.tasks=makeStepTasks(p.workflow,organizer,category);}
+  const template=Object.hasOwn(a,'templateId')?(a.templateId?s.workflowTemplates.find(t=>t.id===a.templateId&&t.groupId===group&&t.category===category):null):a.useTemplate!==false&&s.workflowTemplates.find(t=>t.groupId===group&&t.category===category);
+  if(a.templateId&&!template)throw Error('Workflow template not found for this group and category.');
+  if(template){p.templateId=template.id;p.templateName=template.name;p.workflow=structuredClone(template.steps);p.tasks=makeStepTasks(p.workflow,organizer,category);}
   s.projects.unshift(p);log('Created project: '+p.title,p);notify(p,'New project: '+p.title);return s;
  }
  let p=s.projects.find(p=>p.id===a.project);if(!p||!canViewProject(s,actor,p))throw Error('Project not found or access denied.');

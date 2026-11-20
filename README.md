@@ -26,3 +26,7 @@ Use Node 24 and pnpm (the packageManager version is recorded in package.json). R
 Run `pnpm test` for domain/access/backend tests and `pnpm build` for type checking, the production build, and a public credential scan. `pnpm package:source` creates a source-only zip alongside this folder.
 
 This version preserves the four project categories, courses, custom workflow steps/templates, task organizers and assignments, task counts, comments/links, private groups, review/correction loops, and member removal/restoration. Production sign-in and email delivery must be tested against the selected Supabase project before team use.
+
+## Named workflow templates
+
+Admins and group managers can save multiple named templates per category in Workflow templates, edit them, or duplicate one as a starting point. New projects explicitly choose a template or start blank; digital twin projects retain their built-in review workflow as an option. Saved templates are private to their group. Each project receives an independent snapshot, so later template edits do not alter existing projects. Legacy category workflows receive a default name without losing steps.
