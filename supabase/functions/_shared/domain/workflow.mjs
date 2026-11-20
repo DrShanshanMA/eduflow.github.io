@@ -5,7 +5,7 @@ export const categories=[
  {id:'course-design',name:'Course design and development',icon:'◇',description:'Plan, design and develop course materials.'},
  {id:'traditional-recording',name:'Traditional recording projects',icon:'▷',description:'Coordinate recordings, editing and delivery.'},
  {id:'digital-twin',name:'Digital twin media production',icon:'◈',description:'Produce media with the eight-step review workflow.'},
- {id:'general',name:'General tasks',icon:'✓',description:'Organize other course and team work.'}
+ {id:'general',name:'Customize Projects',icon:'✓',description:'Organize other course and team work.'}
 ];
 const id=()=>crypto.randomUUID();
 const memberExists=(s,email)=>s.members.some(m=>m.email===email&&m.active!==false);
