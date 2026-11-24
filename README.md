@@ -30,3 +30,7 @@ This version preserves the four project categories, courses, custom workflow ste
 ## Named workflow templates
 
 Admins and group managers can save multiple named templates per category in Workflow templates, edit them, or duplicate one as a starting point. New projects explicitly choose a template or start blank; digital twin projects retain their built-in review workflow as an option. Saved templates are private to their group. Each project receives an independent snapshot, so later template edits do not alter existing projects. Legacy category workflows receive a default name without losing steps.
+
+## Session protection
+
+Apply `supabase/security/session-check.sql` before deploying the workflow function. Only the server role can call its session-check function or read revoked-session records. Each workflow request verifies the user with Supabase Auth and checks that the token’s session belongs to that user, still exists, and has not been blocked. Sign out uses global scope. Email credentials are captured in memory and removed from the address bar before callback processing. Copy app link copies only the clean app address. Never forward confirmation, recovery, or sign-in email links.
