@@ -29,6 +29,17 @@ jobs:
         env:
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
+      - name: Install public app
+        working-directory: public-studio
+        run: pnpm install --ignore-workspace --frozen-lockfile
+      - name: Test public app
+        working-directory: public-studio
+        run: pnpm test
+      - name: Build public app
+        working-directory: public-studio
+        run: pnpm build
+      - name: Add public app to website
+        run: cp -R public-studio/dist dist/public
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

@@ -1,0 +1,3 @@
+import {readdir,readFile} from 'node:fs/promises';
+async function scan(dir){for(const item of await readdir(dir,{withFileTypes:true})){const path=dir+'/'+item.name;if(item.isDirectory())await scan(path);else{const body=await readFile(path,'utf8');if(/sb_secret_[A-Za-z0-9_-]+|SUPABASE_SERVICE_ROLE_KEY/.test(body))throw Error('A server credential reference reached the public build.');for(const match of body.matchAll(/eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/g)){try{if(JSON.parse(Buffer.from(match[0].split('.')[1],'base64url')).role==='service_role')throw Error('Server key in public build.');}catch(error){if(error.message==='Server key in public build.')throw error;}}}}}
+await scan('dist');console.log('Public build credential check passed.');
